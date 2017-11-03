@@ -1,21 +1,36 @@
+"""
+The ICGC module implements a simple Python REST client that can be used
+to access our web portal
+"""
+
 import requests
 
-def f(s,*a,**kw):
+
+def fmt(format_string, *a, **kw):
     """
-    Format the given string with the given arguments, similar to Python3's f string syntax
-    :param s: The string
+    Format the given string with the given arguments, similar to Python3's f
+    string syntax
+    :param format_string: The string
     :param a: arguments
     :param kw: keywords
     :return: The formatted string
     """
-    return s.format(*a,**kw)
+    return format_string.format(*a, **kw)
+
 
 class Client(object):
-    def __init__(self, url, authentication):
+    """
+    The Client class is a simple python REST client for accessing the data
+    available through the ICGC web portal.
+    """
+
+    def __init__(self, url="http://dcc.icgc.org", authentication=None):
         """
-        Create an icgc client object, capable of connecting to our servers and fetching data
+        Create an icgc client object, capable of connecting to our servers
+        and fetching data
         :param url: Should we set a default url here?
-        :param authentication: The authentication token required to run the query (currently not used yet)
+        :param authentication: The authentication token required to run the
+        query (currently not used yet)
         """
         self.url = url
         self.authentication = authentication
@@ -26,42 +41,51 @@ class Client(object):
         Return a list of valid request types
         :return: A list of strings naming valid request types
         """
-        return ["donors", "genes", "mutation", "observation","file"]
+        return ["donors", "genes", "mutations", "occurrences"]
+
     @classmethod
     def formats(cls):
         """
         Return a list of valid output formats
         :return: A list of strings naming valid output formats
         """
-        return ["json"] # TODO: Add TSV
+        return ["json"]
 
-    def query(self, requestType, pql, format='json'):
+    def query(self, request_type, pql, output_format='json'):
         """
-        Validate the query request, and return the results from the portal server
-        :param requestType: Type of request: must be a string from "request_types"
+        Validate the query request, and return the results from the portal
+        server
+        :param request_type: Type of request: must be a string from
+        "request_types"
         :param pql: Must be a valid PQL request for the given request_type
-        :param format: Must be a string containing one of the valid output formats
-        :return: The results from running the PQL query on the portal server in the specified output format
+        :param output_format: Must be a string containing one of the valid
+        output formats
+        :return: The results from running the PQL query on the portal server
+        in the specified output format
         """
-        if requestType not in self.request_types():
-            raise TypeError(f("Invalid Request Type {}, must be one of {}", requestType, self.request_types()))
-        if format not in self.formats():
-            raise TypeError(f("Invalid format {}, must be one of {}",format,self.formats()))
+        if request_type not in self.request_types():
+            raise TypeError(fmt("Invalid Request Type {}, must be one of {}",
+                                request_type, self.request_types()))
+        if output_format not in self.formats():
+            raise TypeError(fmt("Invalid format {}, must be one of {}",
+                                output_format, self.formats()))
 
-        url = self.url + f("/{}/pql?query={}",requestType,pql)
+        url = self.url + fmt("/{}/pql?query={}", request_type, pql)
 
-        return self.getUrl(url)
+        return self.get_data(url)
 
-    def getUrl(self, url):
+    @staticmethod
+    def get_data(url):
         """
-        Helper method used to issue a request to the portal server's rest api, and get a result back
+        Helper method used to issue a request to the portal server's rest
+        api, and get a result back
         :param url: The url to contact the server API with
-        :return: The results from the server as a 'requests' response object; raises an IOError if we can't
-                  connect.
+        :return: The results from the server as a 'requests' response object;
+            raises an IOError if we can't connect.
         """
 
-        #print(f"Fetching url {url}")
+        # print(f"Fetching url {url}")
         resp = requests.get(url)
         if resp.status_code != 200:
-            raise IOError(f('GET {} {}',url,resp.status_code))
-        return resp
+            raise IOError(fmt('GET {} {}', url, resp.status_code))
+        return resp.json()
