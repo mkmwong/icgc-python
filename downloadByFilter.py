@@ -23,18 +23,16 @@ This is an example script to download donor information from a copy of the ICGC 
 portal running on your local machine.
 """
 import icgc 
-icgc.BASE_URL="http://localhost:8080/api/v1/"
 
 KB=1024
 MB=1024*KB
 
-#filters='{"donor":{"primarySite":{"is":["Brain"]}}}'
-pql='select(*),eq(donor.primarySite,"Brain")'
+filters='{"donor":{"primarySite":{"is":["Brain"]}}}'
 
 # See what different items are available for our current choice of filter 
 # and how big they are
 
-sizes = icgc.download_size(pql)
+sizes = icgc.download_size_by_filter(filters)
 print("Sizes are: {}".format(sizes))
 
 # Let's choose to download as many different bits of information as we can fit 
@@ -57,4 +55,4 @@ print("Including items {}".format(includes))
 print("Approximate download size={:.2f} MB".format(current_size / MB))
 
 # Download the information, and save the results in the file "test1.tar"
-icgc.download(pql, includes, "test2")
+icgc.download_by_filter(filters, includes, "test1")
