@@ -10,50 +10,94 @@ It lets you write queries in our Portal Query Language ( `PQL <https://github.co
 
 Here's an example that shows you how easy it is to get started!
 ::
-
+    """
+    query.py
+    
+    This script demonstrates running a simple PQL query against the ICGC data
+    portal with the icgc module.
+    """
+    from __future__ import absolute_import, print_function
+    
     import icgc
-    local_server="http://localhost:8080/api/v1/"
-    for request_type in icgc.request_types():
-        response = icgc.query(request_type=request_type, pql='select(*)',base_url=local_server)
-        print(request_type, "===\n\n", response)
+    icgc.BASE_URL = "http://localhost:8080/api/v1/"
+    
+    
+    def run():
+        """
+        Demonstrate PQL by displaying 1 of each request type as JSON output
+        """
+        for request_type in icgc.request_types():
+            response = icgc.query(request_type=request_type,
+                                  pql='select(*),limit(1)')
+            print(request_type, "===\n\n", response)
+    
+    
+    if __name__ == '__main__':
+        run()
 
 Here's an example that demonstrates downloading some donor data
 ::
-
-    import icgc 
+    """
+    download.py
     
-    KB=1024
-    MB=1024*KB
+    This is an example script to download donor information from a copy of the
+    ICGC web portal running on your local machine.
+    """
+    from __future__ import absolute_import, division, print_function
+    import icgc
     
-    filters='{"donor":{"primarySite":{"is":["Brain"]}}}'
+    icgc.BASE_URL = "http://localhost:8080/api/v1/"
     
-    # See what different items are available for our current choice of filter 
-    # and how big they are
+    KB = 1024
+    MB = 1024 * KB
     
-    sizes = icgc.download_size(filters)
-    print("Sizes are: {}".format(sizes))
     
-    # Let's choose to download as many different bits of information as we can fit 
-    # in a reasonably small download, say 10 MB in size, and just download those
-    # ones.
+    def run():
+        """
+        Show an example of a PQL download with automated decision making.
     
-    max_size=10 * MB 
-    current_size=0
+        We download up to a maximum of 10 MB of data from the portal, of any type
+        that will fit within our download limit, and save our the results as a
+        tarfile named 'test.tar'.
+        """
+        pql = 'eq(donor.primarySite,"Brain")'
     
-    # We'll just keep adding items to our list as long as they don't put us over our
-    # download total.
-    includes=[]
-    for k in sizes:
-        item_size=sizes[k]
-        if current_size + item_size < max_size: 
-           includes.append(k)
-           current_size += item_size
+        # Find which items are available that match our pql query, and how big
+        # each of the result file are.
     
-    print("Including items {}".format(includes))
-    print("Approximate download size={:.2f} MB".format(current_size / MB))
+        sizes = icgc.download_size(pql)
+        print("Sizes are: {}".format(sizes))
     
-    # Download the information, and save the results in the file "test1.tar"
-    icgc.download(filters,includes,"test1")
+        # Let's choose to download as many different bits of information as we can
+        # fit in a reasonably small download, say 10 MB in size, so that we don't
+        # have to wait a long time for it to download.
+    
+        # We'll only include  a file in our tarfile if the total is below our
+        # 10 MB limit. Our tarfile size calculation is approximate; the
+        # files inside the tarfile get compressed; so the total size of the tarfile
+        # that we download might be smaller than we calculate.
+    
+        max_size = 10 * MB
+        current_size = 0
+    
+        # We'll just keep adding items to our list as long as they don't put us
+        # over our download total.
+        includes = []
+        for k in sizes:
+            item_size = sizes[k]
+            if current_size + item_size < max_size:
+                includes.append(k)
+                current_size += item_size
+    
+        print("Including items {}".format(includes))
+        print("Approximate download size={:.2f} MB".format(current_size / MB))
+    
+        # Download the information, and save the results in the file "test.tar"
+        icgc.download(pql, includes, "test")
+    
+    
+    if __name__ == "__main__":
+        run()
 
 Installation
 ------------

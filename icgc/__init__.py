@@ -23,13 +23,14 @@
 The ICGC module implements a simple Python REST client that can be used
 to access our web portal
 """
-
+from __future__ import unicode_literals, print_function, absolute_import, division
 import requests
 
 BASE_URL = "https://dcc.icgc.org/api/v1/"
 
+
 def _api_url(format_string, *args, **kw):
-    return BASE_URL +format_string.format(*args, **kw)
+    return BASE_URL + format_string.format(*args, **kw)
 
 
 def default_reporter(name, interval=1, units=1024 * 1024):
@@ -58,39 +59,12 @@ def default_reporter(name, interval=1, units=1024 * 1024):
             report += interval
 
 
-def _get_submit_by_filter_url(filters, info):
-    return _api_url("download/submit?filters={}&info=[{}]", filters, info)
-
-
-def _get_submit_url(pql, info):
-    return _api_url("download/submitPQL?pql={}&info=[{}]", pql, info)
-
-
 def _info_param(include, output_format):
     includes = []
     for k in include:
         txt = "{" + '"key":"{}", "value": "{}"'.format(k, output_format) + "}"
         includes.append(txt)
     return ",".join(includes)
-
-
-def download_by_filter(filters, include, filename, output_format='TSV',
-                       reporter=default_reporter):
-    """
-    Download for filters. will probably go away soon.
-
-    :param filters:
-    :param include:
-    :param filename:
-    :param output_format:
-    :param reporter:
-    :return:
-    """
-    info = _info_param(include, output_format)
-    url = _get_submit_by_filter_url(filters, info)
-    download_id = _submit_job(url)
-    print("Got download_id {}".format(download_id))
-    _download_tarfile(download_id, filename, reporter)
 
 
 def download(pql, include, filename, output_format='TSV',
@@ -105,15 +79,10 @@ def download(pql, include, filename, output_format='TSV',
     :return:
     """
     info = _info_param(include, output_format)
-    url = _get_submit_url(pql, info)
-    download_id = _submit_job(url)
-    _download_tarfile(download_id, filename, reporter)
-
-
-def _submit_job(url):
-    print("submitting url {}".format(url))
+    url = _api_url("download/submitPQL?pql=select(*),{}&info=[{}]", pql, info)
     result = requests.get(url)
-    return result.json()['downloadId']
+    download_id = result.json()['downloadId']
+    _download_tarfile(download_id, filename, reporter)
 
 
 def _download_tarfile(download_id, filename, reporter):
@@ -123,10 +92,8 @@ def _download_tarfile(download_id, filename, reporter):
                               verify=False, stream=True)
 
     if result.status_code >= 400:
-        raise IOError("Couldn't get {}: status code {}".format( url,
-                          result.status_code))
-
-    print("Got result: {}".format(result))
+        raise IOError("Couldn't get {}: status code {}".
+                      format(url, result.status_code))
 
     report = reporter(filename)
     report.send(None)
@@ -145,25 +112,7 @@ def download_size(pql):
     :return:
     """
     url = _api_url("download/sizePQL?pql={}", pql)
-    return _get_download_size(url)
-
-
-def download_size_by_filter(filters):
-    """
-    Get the size of the downloads
-    :param filters:
-    :return:
-    """
-    url = _api_url("download/size?filters={}", filters)
-    return _get_download_size(url)
-
-
-def _get_download_size(url):
     sizes = _get_data(url)['fileSize']
-    return _fix_sizes(sizes)
-
-
-def _fix_sizes(sizes):
     dictionary = {}
     for entry in sizes:
         key = entry['label']
@@ -185,7 +134,7 @@ def formats():
     Return a list of valid output formats
     :return: A list of strings naming valid output formats
     """
-    return ["json","TSV"]
+    return ["json", "TSV"]
 
 
 def query(request_type, pql, output_format='json'):
@@ -201,10 +150,10 @@ def query(request_type, pql, output_format='json'):
 
     if request_type not in request_types():
         raise TypeError("Invalid Request Type {}, must be one of {}".format(
-                            request_type, request_types()))
+            request_type, request_types()))
     if output_format not in formats():
         raise TypeError("Invalid format {}, must be one of {}".format(
-                            output_format, formats()))
+            output_format, formats()))
 
     url = _api_url("{}/pql?query={}", request_type, pql)
     return _get_data(url)
@@ -221,5 +170,5 @@ def _get_data(url):
 
     resp = requests.get(url)
     if resp.status_code != 200:
-        raise IOError('GET {} {}'.format( url, resp.status_code))
+        raise IOError('GET {} {}'.format(url, resp.status_code))
     return resp.json()
