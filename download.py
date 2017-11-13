@@ -23,13 +23,12 @@
 """
 download.py
 
-This is an example script to download donor information from a copy of the
-ICGC web portal running on your local machine.
+This is an example program that downloads files from the ICGC data portal,
+within the bounds of a maximum download size.
 """
-from __future__ import absolute_import, division, print_function
-import icgc
 
-icgc.BASE_URL = "http://localhost:8080/api/v1/"
+from __future__ import absolute_import, print_function, division
+import icgc
 
 KB = 1024
 MB = 1024 * KB

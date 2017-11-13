@@ -42,7 +42,7 @@ def run():
     here = path.abspath(path.dirname(__file__))
 
     # Get the long description from the README file
-    with open_(path.join(here, 'README.rst'), encoding='utf-8') as file_:
+    with open_(path.join(here, 'docs/index.rst'), encoding='utf-8') as file_:
         long_description = file_.read()
 
     setup(
@@ -51,7 +51,7 @@ def run():
         # single-sourcing the version across setup.py and the project code,
         # see
         # https://packaging.python.org/en/latest/single_source_version.html
-        version='0.0.1',
+        version='0.1.1',
         description="A Python library interface to the International Cancer "
                     "Genome Consortium's Web Portal",
         long_description=long_description,
