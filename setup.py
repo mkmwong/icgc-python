@@ -1,25 +1,31 @@
 #!/usr/bin/python
-# Copyright (c) 2017 The Ontario Institute for Cancer Research. All rights reserved.
+# Copyright (c) 2017 The Ontario Institute for Cancer Research. All rights
+# reserved.
 #
-# This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
+# This program and the accompanying materials are made available under the
+# terms of the GNU Public License v3.0.
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <http://www.gnu.org/licenses/>.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
-# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
-# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""A setuptools based setup module.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+# IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,  BUT NOT LIMITED
+# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+# OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+A setuptools based setup module.
 
 See:
 https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
 """
+from __future__ import print_function, absolute_import
 
 # To use a consistent encoding
 from codecs import open as open_
@@ -36,7 +42,7 @@ def run():
     here = path.abspath(path.dirname(__file__))
 
     # Get the long description from the README file
-    with open_(path.join(here, 'README.rst'), encoding='utf-8') as file_:
+    with open_(path.join(here, 'docs/index.rst'), encoding='utf-8') as file_:
         long_description = file_.read()
 
     setup(
@@ -45,7 +51,7 @@ def run():
         # single-sourcing the version across setup.py and the project code,
         # see
         # https://packaging.python.org/en/latest/single_source_version.html
-        version='0.0.1',
+        version='0.1.1',
         description="A Python library interface to the International Cancer "
                     "Genome Consortium's Web Portal",
         long_description=long_description,
@@ -115,7 +121,7 @@ def run():
         },
 
         # Although 'package_data' is the preferred approach, in some case you
-        # mayneed to place data files outside of your packages. See:
+        # may need to place data files outside of your packages. See:
         # http://docs.python.org/3.4/distutils/
         #       setupscript.html#installing-additional-files # noqa
         # In this case, 'data_file' will be installed into
