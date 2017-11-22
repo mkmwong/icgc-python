@@ -161,7 +161,13 @@ def query(request_type, pql, output_format='json'):
 
     url = _api_url("{}/pql?query={}", request_type, pql)
     response = _get_data(url)
+
+    if pql.startswith("count()"):
+        facets = response['facets']
+        facets['total'] = response['pagination']['total']
+        return json.dumps(facets, indent=4, sort_keys=True)
     return json.dumps(response['hits'], indent=4, sort_keys=True)
+
 
 def _get_data(url):
     """
