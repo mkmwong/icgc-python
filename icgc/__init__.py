@@ -163,10 +163,21 @@ def query(request_type, pql, output_format='json'):
     response = _get_data(url)
 
     if pql.startswith("count()"):
-        facets = response['facets']
-        facets['total'] = response['pagination']['total']
-        return json.dumps(facets, indent=4, sort_keys=True)
-    return json.dumps(response['hits'], indent=4, sort_keys=True)
+        try:
+            result = response['facets']
+        except KeyError:
+            result = {'total': None}
+
+        try:
+            result['total'] = response['pagination']['total']
+        except KeyError:
+            pass
+    elif 'hits' in response:
+        result = response['hits']
+    else:
+        result = []
+
+    return json.dumps(result, indent=4, sort_keys=True)
 
 
 def _get_data(url):
