@@ -28,6 +28,74 @@ import requests
 
 BASE_URL = "https://dcc.icgc.org/api/v1/"
 
+class ICGCBrowser(object):
+    """
+    A class that lets you browse the content of our repository
+    """
+    def __init__(self,token,path="/"):
+        self.token = ""
+        self.home = path
+        self.path = path
+
+    def resolve_path(self, path):
+        if path is None:
+            return self.path
+
+        if path.startswith("/"):
+            return path
+
+        if path.startswith(".."):
+            return self._resolve_parent(path,self.home)
+
+        return self.path + "/" + path
+
+    def _resolve_parent(self, path, base):
+        if path == "..":
+            return self._parent(base)
+        elif path.startswith("../"):
+            print("Recursing with {},{}".format(path[2:],self._parent(base)))
+            return self._resolve_parent(path[2:],self._parent(base))
+        else:
+            return base  + path
+
+    def _parent(self, path):
+        if path == "/":
+            raise TypeError("Path {} has no parent!".format(path))
+        parent, _, folder = path.rpartition("/")
+
+        return parent
+
+    def _name(self, path):
+        parent, _, name = path.rpartition("/")
+        return name
+
+
+    def cd(self, path=None):
+        if path is None:
+            path=self.home
+        self.path = self.resolve_path(path)
+
+    def ls(self, path=None):
+        path = self.resolve_path(path)
+        url = self._get_info_url(path)
+        reply=requests.get(url)
+        return reply.json()
+
+
+    def get(self, path=None, file=None):
+        path=self.resolve_path(path)
+        url=self._get_download_url(path)
+        reply=requests.get(url)
+
+        with open(self._name(path),"wb") as f:
+            f.write(reply.content)
+
+
+    def _get_download_url(self, path):
+        return "{}download?fn={}".format(BASE_URL, path)
+
+    def _get_info_url(self, path):
+        return "{}download/info{}".format(BASE_URL,path)
 
 def _api_url(format_string, *args, **kw):
     return BASE_URL + format_string.format(*args, **kw)
@@ -70,12 +138,14 @@ def _info_param(include, output_format):
 def download(pql, include, filename, output_format='TSV',
              reporter=default_reporter):
     """
-    Download for pql. Needs testing.
-    :param pql:
-    :param include:
-    :param filename:
-    :param output_format:
-    :param reporter:
+    Download pql for the categories in the include list as a tar file
+    :param pql: The PQL(Portal Query Language) query to select items with
+    :param include: The download file types to use (keys from download_size())
+    :param filename: The name of the tarfile (.tar will be appended)
+    :param output_format: TSV or JSON (default TSV)
+    :param reporter: generator function to use to monitor download.
+            It defaults to the generator returned by the "default_reporter"
+            method in this class.
     :return:
     """
     info = _info_param(include, output_format)
