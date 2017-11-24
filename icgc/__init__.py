@@ -23,7 +23,11 @@
 The ICGC module implements a simple Python REST client that can be used
 to access our web portal
 """
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
+
+import json
+
 import requests
 
 BASE_URL = "https://dcc.icgc.org/api/v1/"
@@ -156,7 +160,24 @@ def query(request_type, pql, output_format='json'):
             output_format, formats()))
 
     url = _api_url("{}/pql?query={}", request_type, pql)
-    return _get_data(url)
+    response = _get_data(url)
+
+    if pql.startswith("count()"):
+        try:
+            result = response['facets']
+        except KeyError:
+            result = {'total': None}
+
+        try:
+            result['total'] = response['pagination']['total']
+        except KeyError:
+            pass
+    elif 'hits' in response:
+        result = response['hits']
+    else:
+        result = []
+
+    return json.dumps(result, indent=4, sort_keys=True)
 
 
 def _get_data(url):
