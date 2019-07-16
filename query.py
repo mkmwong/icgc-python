@@ -29,16 +29,14 @@ portal with the icgc module.
 from __future__ import absolute_import, print_function
 
 import icgc
+import sys
 
-
+pql_query = sys.argv[1]
+request_type = sys.argv[2]
 def run():
-    """
-    Demonstrate PQL by displaying 1 of each request type as JSON output
-    """
-    for request_type in icgc.request_types():
-        response = icgc.query(request_type=request_type,
-                              pql='select(*),limit(1)')
-        print(request_type, "===\n\n", response)
+    response = icgc.query(request_type=request_type,
+                              pql=pql_query)
+    print(response)
 
 
 if __name__ == '__main__':
